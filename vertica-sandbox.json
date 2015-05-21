@@ -1,0 +1,53 @@
+{
+  "variables":{
+    "mapr_version":"4.1.0",
+    "partner_name":"vertica",
+    "partner_version":"7.1.1"
+  },
+  "builders":[
+    {
+      "name":"partner",
+      "vm_name":"MapR-{{ user `partner_name` }}-{{ user `mapr_version` }}-{{ user `partner_version`}}",
+      "type":"virtualbox-ovf",
+      "source_path":"output-virtualbox-ovf/MapR-Sandbox-For-Hadoop-{{ user `mapr_version` }}.ova",
+      "ssh_username":"root",
+      "ssh_password":"mapr",
+      "ssh_wait_timeout":"300s",
+      "import_opts":"keepallmacs",
+      "shutdown_command":"shutdown -P now",
+      "format":"ova"
+    }
+  ],
+  "provisioners":[
+
+
+    {
+      "type":"file",
+      "source":"files/start_{{ user `partner_name` }}_db.sh",
+      "destination":"/opt/mapr/server/start_{{ user `partner_name` }}_db.sh"
+    },
+    {
+      "type":"file",
+      "source":"files/test_vertica_db.sh",
+      "destination":"/opt/mapr/server/test_vertica_db.sh"
+    },
+    {
+      "type":"file",
+      "source":"tmp/vertica-{{ user `partner_version`}}-0.x86_64.RHEL5.rpm",
+      "destination":"/tmp/{{ user `partner_name` }}.rpm"
+    },
+    { 
+      "type": "shell",
+      "execute_command": "{{ .Vars }} bash {{.Path}}",
+      "scripts": [
+        "script/vertica.sh"
+      ]
+    }
+
+
+  ]
+}
+
+
+
+  
